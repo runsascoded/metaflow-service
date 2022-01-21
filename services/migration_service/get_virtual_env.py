@@ -7,30 +7,29 @@ from services.data.service_configs import max_startup_retries, \
 
 port = int(os.environ.get("MF_MIGRATION_PORT", 8082))
 
-try:
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    retry_count = max_startup_retries
-    while retry_count > 0:
-        print(retry_count)
-        try:
-            print("connecting")
-            s.connect(('localhost', port))
-            print("Port reachable", port)
-            break
-        except socket.error as e:
-            print("booting...")
-            print(e)
-            time.sleep(startup_retry_wait_time_seconds)
-        except Exception:
-            print("something broke")
-        finally:
-            retry_count = retry_count - 1
-    # continue
-    s.close()
-except Exception as e:
-    print(e)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+retry_count = max_startup_retries
+while retry_count > 0:
+    print(retry_count)
+    try:
+        print(f"Check for running migration service at localhost:{port} ({retry_count} attempts remain):")
+        s.connect(('localhost', port))
+        print("Migration service reachable!", port)
+        break
+    except socket.error as e:
+        print(f"Migration service not found:")
+        print(e)
+        print(f"sleeping for {startup_retry_wait_time_seconds}s ...")
+        time.sleep(startup_retry_wait_time_seconds)
+    finally:
+        retry_count = retry_count - 1
+# continue
+s.close()
 
-r = requests.get('http://localhost:{0}/version'.format(port))
-conf_file = open('/root/services/migration_service/config', 'w')
-print(r.text, file=conf_file)
-conf_file.close()
+url = 'http://localhost:{0}/version'.format(port)
+print(f'Getting version from url: {url}')
+r = requests.get(url)
+text = r.text
+print(f'Got version: {text}')
+with open('/root/services/migration_service/config', 'w') as conf_file:
+    print(text, file=conf_file)
