@@ -7,6 +7,7 @@ services:
     ports:
       - "${MF_MIGRATION_PORT:-8082}:${MF_MIGRATION_PORT:-8082}"
       - "${MF_METADATA_PORT:-8080}:${MF_METADATA_PORT:-8080}"
+      - "${MF_UI_PORT:-8083}:${MF_UI_PORT:-8083}"
     volumes:
       - .:/code
     environment:
@@ -20,6 +21,7 @@ services:
       - MF_METADATA_HOST=${MF_METADATA_HOST:-0.0.0.0}
       - MF_MIGRATION_PORT=${MF_MIGRATION_PORT:-8082}
       - MF_SERVICE_STARTUP_RETRIES=10
+      - MF_UI_PORT=${MF_UI_PORT:-8083}
     links:
       - db
   db:

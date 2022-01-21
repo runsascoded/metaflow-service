@@ -13,17 +13,18 @@ def setup_env(version_value: str):
 
 if __name__ == "__main__":
     try:
+        latest = setup_env('latest')
         migration_server_process = Popen(
             "PYTHONPATH=/ python3 -m services.migration_service.migration_server",
             shell=True,
             close_fds=True,
-            env=setup_env('latest')
+            env=latest,
         )
 
         get_env_version = Popen(
             "python3 -m services.migration_service.get_virtual_env",
             shell=True,
-            close_fds=True
+            close_fds=True,
         )
 
         get_env_version.wait()
@@ -32,16 +33,26 @@ if __name__ == "__main__":
         version_value_file = open('/root/services/migration_service/config', 'r')
         version_value = str(version_value_file.read()).strip()
 
+        env = setup_env(version_value)
+
         # start proper version of metadata service
         metadata_server_process = Popen(
             "metadata_service",
             shell=True,
             close_fds=True,
-            env=setup_env(version_value)
+            env=env,
+        )
+
+        ui_backend_server_process = Popen(
+            "ui_backend_service",
+            shell=True,
+            close_fds=True,
+            env=latest,
         )
 
         metadata_server_process.wait()
         migration_server_process.wait()
+        ui_backend_server_process.wait()
     except Exception as e:
         print(e)
     finally:
