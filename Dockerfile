@@ -5,11 +5,6 @@ ARG BUILD_COMMIT_HASH
 ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
 ENV BUILD_COMMIT_HASH=$BUILD_COMMIT_HASH
 
-ARG UI_ENABLED="1"
-ARG UI_VERSION="v1.0.0"
-ENV UI_ENABLED=$UI_ENABLED
-ENV UI_VERSION=$UI_VERSION
-
 ENV FEATURE_RUN_GROUPS=0
 ENV FEATURE_DEBUG_VIEW=1
 
@@ -33,9 +28,6 @@ ADD services/utils /root/services/utils
 ADD setup.py setup.cfg /root/
 WORKDIR /root
 RUN /opt/latest/bin/pip install .
-
-# Install Netflix/metaflow-ui release artifact
-RUN /root/services/ui_backend_service/download_ui.sh
 
 # Migration Service
 ADD services/migration_service /root/services/migration_service
